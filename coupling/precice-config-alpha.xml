@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<precice-configuration>
+    <data:vector name="Velocity_SWE_FOAM"/>
+    <data:vector name="Velocity_FOAM_SWE"/>
+    <data:scalar name="Alpha_FOAM_SWE"/>
+    <data:scalar name="Alpha_SWE_FOAM"/>
+
+    <mesh name="SWE_Sides" dimensions="3">
+        <use-data name="Velocity_SWE_FOAM"/>
+        <use-data name="Alpha_SWE_FOAM"/>
+    </mesh>
+
+    <mesh name="FOAM_Sides" dimensions="3">
+        <use-data name="Velocity_SWE_FOAM"/>
+        <use-data name="Alpha_SWE_FOAM"/>
+    </mesh>
+
+    <mesh name="SWE_Top" dimensions="3">
+        <use-data name="Velocity_FOAM_SWE"/>
+        <use-data name="Alpha_FOAM_SWE"/>
+    </mesh>
+
+    <mesh name="FOAM_Top" dimensions="3">
+        <use-data name="Velocity_FOAM_SWE"/>
+        <use-data name="Alpha_FOAM_SWE"/>
+    </mesh>
+
+    <participant name="SWEET">
+        <provide-mesh name="SWE_Sides"/>
+        <provide-mesh name="SWE_Top"/>
+
+        <read-data name="Velocity_FOAM_SWE" mesh="SWE_Top"/>
+        <read-data name="Alpha_FOAM_SWE" mesh="SWE_Top"/>
+        <write-data name="Velocity_SWE_FOAM" mesh="SWE_Sides"/>
+        <write-data name="Alpha_SWE_FOAM" mesh="SWE_Sides"/>
+    </participant>
+
+    <participant name="OpenFOAM">
+        <provide-mesh name="FOAM_Sides"/>
+        <receive-mesh name="SWE_Sides" from="SWEET"/>
+        <provide-mesh name="FOAM_Top"/>
+        <receive-mesh name="SWE_Top" from="SWEET"/>
+
+        <read-data name="Velocity_SWE_FOAM" mesh="FOAM_Sides"/>
+        <read-data name="Alpha_SWE_FOAM" mesh="FOAM_Sides"/>
+        <write-data name="Velocity_FOAM_SWE" mesh="FOAM_Top"/>
+        <write-data name="Alpha_FOAM_SWE" mesh="FOAM_Top"/>
+
+        <mapping:nearest-neighbor direction="read" from="SWE_Sides" to="FOAM_Sides" constraint="consistent"/>
+        <mapping:nearest-neighbor direction="write" from="FOAM_Top" to="SWE_Top" constraint="consistent"/>
+    </participant>
+
+    <m2n:sockets acceptor="OpenFOAM" connector="SWEET"
+                 exchange-directory="/home/armin/Documents/sweet_precice_coupling/benchmarks_plane/coupling"/>
+
+    <coupling-scheme:serial-explicit>
+        <participants first="SWEET" second="OpenFOAM"/>
+        <max-time value="1000"/>
+        <time-window-size value="1"/>
+        <exchange data="Velocity_SWE_FOAM" mesh="SWE_Sides" from="SWEET" to="OpenFOAM"/>
+        <exchange data="Alpha_SWE_FOAM" mesh="SWE_Sides" from="SWEET" to="OpenFOAM" initialize="yes"/>
+        <exchange data="Velocity_FOAM_SWE" mesh="SWE_Top" from="OpenFOAM" to="SWEET"/>
+        <exchange data="Alpha_FOAM_SWE" mesh="SWE_Top" from="OpenFOAM" to="SWEET" initialize="yes"/>
+    </coupling-scheme:serial-explicit>
+</precice-configuration>

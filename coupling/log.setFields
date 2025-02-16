@@ -1,0 +1,42 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2406                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _9bfe8264-20241212 OPENFOAM=2406 patch=241212 version=2406
+Arch   : "LSB;label=32;scalar=64"
+Exec   : setFields -case interfoam_case
+Date   : Feb 16 2025
+Time   : 22:45:54
+Host   : armin-MS-7C02
+PID    : 10245
+I/O    : uncollated
+Case   : /home/armin/Documents/thesis_sweet_coupling/coupling/interfoam_case
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Reading setFieldsDict
+
+Setting volume field default values
+    - set internal values of volScalarField: alpha.water = 0
+
+Setting field region values
+
+    Adding cells with centre within boxes 1((0 0 1000) (100000 100000 10000))
+    Selected 225000/450000 cells
+    - set internal values of volScalarField: alpha.water = 0
+    Adding cells with centre within boxes 1((0 0 0) (100000 100000 1000))
+    Selected 225000/450000 cells
+    - set internal values of volScalarField: alpha.water = 1
+
+End
+

@@ -1,0 +1,14 @@
+#!/bin/sh
+#cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+rm -f log.blockMesh
+rm -f log.surfaceFeatureExtract
+
+pyFoamClearCase.py interfoam_case/
+
+runApplication surfaceFeatureExtract -case interfoam_case
+runApplication blockMesh -case interfoam_case
+snappyHexMesh -case interfoam_case -overwrite
+#------------------------------------------------------------------------------

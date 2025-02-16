@@ -1,0 +1,63 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      preciceDict;
+}
+
+preciceConfig "precice-config-alpha.xml";
+
+participant OpenFOAM;
+
+vertical_samples 20;
+
+modules (FF);
+
+FF
+{
+    solverType incompressible;
+    nameAlpha alpha.water;
+}
+
+interfaces
+{
+    Interface1
+      {
+        mesh            FOAM_Top;
+        patches         (atmosphere);
+        locations       faceCenters;
+
+        writeData
+        (
+         Velocity_FOAM_SWE
+         Alpha_FOAM_SWE
+        );
+
+        readData
+        (
+
+        );
+      }
+
+  Interface2
+  {
+    mesh              FOAM_Sides;
+    patches           (interaction);
+    locations         faceCenters;
+
+    readData
+    (
+     Alpha_SWE_FOAM
+     Velocity_SWE_FOAM
+    );
+
+    writeData
+    (
+
+    );
+  };
+
+
+};

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<precice-configuration>
+    <data:vector name="Velocity_SWE_FOAM"/>
+    <data:vector name="Velocity_FOAM_SWE"/>
+
+    <mesh name="SWE_Sides" dimensions="3">
+        <use-data name="Velocity_SWE_FOAM"/>
+    </mesh>
+
+    <mesh name="FOAM_Sides" dimensions="3">
+        <use-data name="Velocity_SWE_FOAM"/>
+    </mesh>
+
+    <mesh name="SWE_Top" dimensions="3">
+        <use-data name="Velocity_FOAM_SWE"/>
+    </mesh>
+
+    <mesh name="FOAM_Top" dimensions="3">
+        <use-data name="Velocity_FOAM_SWE"/>
+    </mesh>
+
+    <participant name="SWEET">
+        <provide-mesh name="SWE_Sides"/>
+        <provide-mesh name="SWE_Top"/>
+        <receive-mesh name="FOAM_Top" from="OpenFOAM"/>
+
+
+        <read-data name="Velocity_FOAM_SWE" mesh="SWE_Top"/>
+        <write-data name="Velocity_SWE_FOAM" mesh="SWE_Sides"/>
+
+        <mapping:nearest-neighbor direction="read" from="FOAM_Top" to="SWE_Top" constraint="consistent"/>
+    </participant>
+
+    <participant name="OpenFOAM">
+        <provide-mesh name="FOAM_Sides"/>
+        <receive-mesh name="SWE_Sides" from="SWEET"/>
+        <provide-mesh name="FOAM_Top"/>
+
+
+        <read-data name="Velocity_SWE_FOAM" mesh="FOAM_Sides"/>
+        <write-data name="Velocity_FOAM_SWE" mesh="FOAM_Top"/>
+
+        <mapping:nearest-neighbor direction="read" from="SWE_Sides" to="FOAM_Sides" constraint="consistent"/>
+    </participant>
+
+    <m2n:sockets acceptor="OpenFOAM" connector="SWEET"/>
+
+    <coupling-scheme:serial-explicit>
+        <participants first="SWEET" second="OpenFOAM"/>
+        <max-time value="200000"/>
+        <time-window-size value="600"/>
+        <exchange data="Velocity_SWE_FOAM" mesh="SWE_Sides" from="SWEET" to="OpenFOAM"/>
+        <exchange data="Velocity_FOAM_SWE" mesh="FOAM_Top" from="OpenFOAM" to="SWEET"/>
+    </coupling-scheme:serial-explicit>
+
+</precice-configuration>

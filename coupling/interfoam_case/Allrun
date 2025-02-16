@@ -1,0 +1,16 @@
+#!/bin/sh
+#cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+rm -f log.setFields
+rm -f log.interFoam
+
+pyFoamClearCase.py interfoam_case/
+
+rm -rf interfoam_case/0
+cp -r interfoam_case/0.orig interfoam_case/0
+
+runApplication setFields -case interfoam_case
+interFoam -case interfoam_case
+#------------------------------------------------------------------------------
