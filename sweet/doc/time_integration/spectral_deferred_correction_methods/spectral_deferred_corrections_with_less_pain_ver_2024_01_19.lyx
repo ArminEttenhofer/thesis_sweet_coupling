@@ -1,0 +1,1910 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Spectral Deferred Corrections...
+ with less pain
+\end_layout
+
+\begin_layout Author
+Martin Schreiber
+\end_layout
+
+\begin_layout Date
+2023-07-24
+\end_layout
+
+\begin_layout Abstract
+This document is written for applied mathematicians and HPC engineers who
+ still need to become more familiar with spectral deferred correction (SDC)
+ methods and who would like to avoid the frustration of SDC methods by understan
+ding them, implementing them, and understanding their limitations.
+ It provides both a mathematical perspective and an implementation perspective,
+ which becomes particularly challenging once the SDC methods are extended
+ to other, more generic formulations.
+ This document is intended for teaching purposes rather than publication
+ and is mainly a review, providing insight from different angles.
+ Aspects such as numerical investigation, stability regions, etc., are not
+ included since this is left to be either found in the publications or generated
+ relatively straightforwardly.
+\end_layout
+
+\begin_layout Abstract
+
+\series bold
+If you spot any errors, please let the author know (
+\begin_inset CommandInset href
+LatexCommand href
+target "schreiberx@gmail.com"
+type "mailto:"
+literal "false"
+
+\end_inset
+
+)!
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+SDC methods have become increasingly popular over the last decade since
+ they allow higher-order time integration by solely providing 1st order
+ time integrators.
+ SDC then allows iterative improvement of the solution.
+\end_layout
+
+\begin_layout Standard
+Although they are of higher order, their applicability needs to be improved
+ due to their large computational complexity.
+ Also, in areas such as atmospheric simulations, their time step size is
+ still limited compared to more sophisticated time integration methods such
+ as semi-Lagrangian methods, and further research around this is currently
+ under investigation.
+\end_layout
+
+\begin_layout Standard
+The following notes have been strongly influenced by various publications.
+ Although originally not directly related to SDC methods, we start with
+ the collocation formulation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hairer_solving_1987"
+literal "false"
+
+\end_inset
+
+ in Sec.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:collocation-method"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Then, we continue with SDC (Sec.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:SDC-derivation"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) where we will briefly explain the first paper about SDC methods 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "dutt_spectral_1998"
+literal "false"
+
+\end_inset
+
+ (Sec.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Original-SDC-line-by-line"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+ Here, the corrections have been explicitly expressed in terms or error
+ and residual polynomials which is rather complicated.
+ Alternative formulations have been found and investigated (see, e.g., 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "minion_semi-implicit_2003,buvoli_class_2015"
+literal "false"
+
+\end_inset
+
+) which provide a more convenient formulation and in particular avoid the
+ explicit computation of the error polynomial which we call compact node-to-node
+ formulation (Sec.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:compact-node-to-node"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+ Originally intended for mathematical studies, another formulation (see
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ruprecht_spectral_2016"
+literal "false"
+
+\end_inset
+
+) allows to use a compact zero-to-node (Sec.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:sdc_compact-zero-to-node"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) based on a matrix formulation.
+\end_layout
+
+\begin_layout Standard
+Since the devil is in the detail, we continue by discussing details on how
+ to implement the SDC methods in Sec.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Realization-with-compact"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ if using explicit, implicit or arbitrary integration methods.
+\end_layout
+
+\begin_layout Section
+Problem
+\end_layout
+
+\begin_layout Standard
+Given an ODE
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+u'(t)=f(u(t),s),\,\,\,u(t_{0})=u_{0}\label{eq:ode_std_formulation}
+\end{equation}
+
+\end_inset
+
+to solve in the interval
+\begin_inset Formula 
+\[
+t\in[0,\Delta t].
+\]
+
+\end_inset
+
+Solutions to this can be computed using the Picard formulation
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+u(t)=u(a)+\int_{a}^{t}f(u(s),s)ds.\label{eq:picard}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Collocation method
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:collocation-method"
+
+\end_inset
+
+We continue with the collocation method and introduce (quadrature) nodes
+ 
+\begin_inset Formula $\tau_{i}$
+\end_inset
+
+ which are given by
+\begin_inset Formula 
+\begin{equation}
+\left\{ \tau_{i}|1\leq i\leq M\right\} 
+\end{equation}
+
+\end_inset
+
+within the unit interval
+\begin_inset Formula 
+\begin{equation}
+\tau_{i}\in[0,1].
+\end{equation}
+
+\end_inset
+
+Quadrature-based nodes have two main advantageous: They don't suffer of
+ the Runge phenomena and they allow to use a higher-order quadrature at
+ then end (See 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "dutt_spectral_1998"
+literal "false"
+
+\end_inset
+
+).
+ We extend these points to
+\begin_inset Formula 
+\begin{equation}
+\left\{ \tau_{i}|0\leq i\leq M+1\right\} 
+\end{equation}
+
+\end_inset
+
+by setting 
+\begin_inset Formula $\tau_{0}=0$
+\end_inset
+
+ and 
+\begin_inset Formula $\tau_{M+1}=\Delta t$
+\end_inset
+
+.
+ Then, the subtimesteps are given by
+\begin_inset Formula 
+\begin{equation}
+\Delta\tau_{m}=\tau_{m}-\tau_{m-1}\,\,\,\text{for}\,m=1,\ldots,M+1.
+\end{equation}
+
+\end_inset
+
+The integral in Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:picard"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ can be approximated by
+\begin_inset Formula 
+\begin{equation}
+u(\tau_{m})=u_{0}+\sum_{j=1}^{M}q_{m,j}f(u(\tau_{j}),\tau_{j})\,\,\,\text{for}\,m=1,\ldots,M.
+\end{equation}
+
+\end_inset
+
+The coefficients 
+\begin_inset Formula $q_{m,j}$
+\end_inset
+
+ can be computed using the standard collocation method
+\begin_inset Formula 
+\begin{equation}
+q_{m,j}=\int_{0}^{\tau_{m}}l_{j}(s)ds\label{eq:spectral_integration_coefficients}
+\end{equation}
+
+\end_inset
+
+with 
+\begin_inset Formula $l_{j}$
+\end_inset
+
+ the 
+\begin_inset Formula $j$
+\end_inset
+
+-th Lagrange polynomial.
+\end_layout
+
+\begin_layout Subsection
+Closure methods
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:collocation-closure-methods"
+
+\end_inset
+
+Finally, we need to get a solution at 
+\begin_inset Formula $u(t=\Delta t)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Direct method:
+\series default
+
+\begin_inset Newline newline
+\end_inset
+
+If the last quadrature point coincides with 
+\begin_inset Formula $t=\Delta t$
+\end_inset
+
+, we could take the solution at this last quadrature point as the solution.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Extrapolation:
+\series default
+
+\begin_inset Newline newline
+\end_inset
+
+We can use an extrapolation by computing an interpolation through all quadrature
+ points and evaluating it at 
+\begin_inset Formula $t=\Delta t$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Quadrature:
+\series default
+
+\begin_inset Newline newline
+\end_inset
+
+A higher-order accuracy can be gained with a quadrature method using the
+ corresponding weights 
+\begin_inset Formula $w_{j}$
+\end_inset
+
+ of some quadrature for the quadrature points 
+\begin_inset Formula $\tau_{j}$
+\end_inset
+
+ to evaluate the integral of Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:picard"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Iterative solution
+\end_layout
+
+\begin_layout Standard
+We use the exponent 
+\begin_inset Formula $k$
+\end_inset
+
+ to describe the 
+\begin_inset Formula $k$
+\end_inset
+
+-th iteration and use the notation
+\begin_inset Formula 
+\begin{equation}
+U=\left(u_{1},u_{2},\ldots,u_{M}\right)=\left(u(\tau_{1}),u(\tau_{2}),\ldots,u(\tau_{M})\right)
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+U_{0}=\left(u_{0},u_{0},\ldots,u_{0}\right)
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\tau=\left(\tau_{1},\ldots,\tau_{M}\right)
+\end{equation}
+
+\end_inset
+
+and
+\begin_inset Formula 
+\begin{equation}
+F(U,\tau)=\left(f\left(u_{1},\tau_{1}\right),f\left(u_{2},\tau_{2}\right),\ldots,f\left(u_{M},\tau_{M}\right)\right).
+\end{equation}
+
+\end_inset
+
+We can then write the solution as
+\begin_inset Formula 
+\begin{equation}
+U(\tau)=U_{0}+QF\left(U(\tau),\tau\right)
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $Q$
+\end_inset
+
+ is the spectral integration matrix given by Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:spectral_integration_coefficients"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ or as a fixed point iteration
+\begin_inset Formula 
+\begin{align}
+U^{k+1}(\tau) & =U_{0}+QF\left(U^{k}(\tau),\tau\right)\nonumber \\
+ & =U^{k}+\left(U_{0}-U^{k}+QF\left(U^{k},\tau\right)\right)\label{eq:fixed-point-collocation}
+\end{align}
+
+\end_inset
+
+with
+\begin_inset Formula 
+\begin{equation}
+U=\left(u_{1}^{k},u_{2}^{k},\ldots,u_{M}^{k}\right)=\left(u^{k}(\tau_{1}),u^{k}(\tau_{2}),\ldots,u^{k}(\tau_{M})\right).
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+SDC derivation
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:SDC-derivation"
+
+\end_inset
+
+We will first derive SDC from Dutt et al.'s original formulation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "dutt_spectral_1998"
+literal "false"
+
+\end_inset
+
+ and then relate it to a more modern formulation.
+ We start with the residual in the k-th iteration given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+r^{k}(t)=u^{k}(a)+\int_{a}^{t}f\left(u^{k}(s),s\right)ds-u^{k}(t)\label{eq:residual_in_sdc}
+\end{equation}
+
+\end_inset
+
+and the error
+\begin_inset Formula 
+\begin{equation}
+\epsilon^{k}(t)=u(t)-u^{k}(t)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Leftrightarrow\,\,\,u(t)=\epsilon^{k}(t)+u^{k}(t).\label{eq:error_in_sdc}
+\end{equation}
+
+\end_inset
+
+Using Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:error_in_sdc"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ in the Picard Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:picard"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ yields
+\begin_inset Formula 
+\begin{equation}
+\epsilon^{k}(t)+u^{k}(t)=\epsilon^{k}(a)+u^{k}(a)+\int_{a}^{t}f(\epsilon^{k}(s)+u^{k}(s),s)ds.\label{eq:no_clue_how_to_name_this_equation}
+\end{equation}
+
+\end_inset
+
+Next, we can rewrite Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:residual_in_sdc"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ as
+\begin_inset Formula 
+\begin{equation}
+u^{k}(a)=r^{k}(t)-\int_{0}^{t}f\left(u^{k}(s),s\right)ds+u^{k}(t)
+\end{equation}
+
+\end_inset
+
+and using this equation in Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:no_clue_how_to_name_this_equation"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ yields
+\begin_inset Formula 
+\begin{align}
+\epsilon^{k}(t)+\cancel{u^{k}(t)} & =\epsilon^{k}(a)+r^{k}(t)-\int_{a}^{t}f\left(u^{k}(s),s\right)ds+\cancel{u^{k}(t)}+\int_{a}^{t}f(\epsilon^{k}(s)+u^{k}(s),s)ds\\
+\epsilon^{k}(t) & =\epsilon^{k}(a)+r^{k}(t)-\int_{a}^{t}f\left(u^{k}(s),s\right)+f(\epsilon^{k}(s)+u^{k}(s),s)ds
+\end{align}
+
+\end_inset
+
+Using the notation
+\begin_inset Formula 
+\begin{equation}
+G(u^{k},\epsilon^{k},s)=f(u^{k}(s)+\epsilon^{k}(s),s)-f\left(u^{k}(s),s\right)\label{eq:g_formulation}
+\end{equation}
+
+\end_inset
+
+we can obtain
+\begin_inset Formula 
+\begin{equation}
+\epsilon^{k}(t)-\epsilon^{k}(a)=\int_{a}^{t}G(u^{k}(s),s)ds+r^{k}(t).\label{eq:error_equation}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Original SDC line-by-line
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Original-SDC-line-by-line"
+
+\end_inset
+
+We arrived at a form where 
+\begin_inset Formula $G$
+\end_inset
+
+ only depends on the error (we know how to evaluate it at the current point)
+ and where we need to approximate the residual somehow.
+ Therefore, this equation can be solved using some off-the-shelf time integrator
+, which we denote by
+\begin_inset Formula 
+\begin{equation}
+I_{a}^{t}(u^{k}(s),\epsilon^{k}(s))\approx\int_{a}^{t}G(u^{k}(s),\epsilon^{k}(s),s)ds
+\end{equation}
+
+\end_inset
+
+advancing 
+\begin_inset Formula $G(u^{k},s)$
+\end_inset
+
+ from 
+\begin_inset Formula $a$
+\end_inset
+
+ to 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ Introducing the discrete points in time 
+\begin_inset Formula $\tau_{i}$
+\end_inset
+
+ with 
+\begin_inset Formula $a=\tau_{m}$
+\end_inset
+
+ and 
+\begin_inset Formula $t=\tau_{m+1}$
+\end_inset
+
+ and the corresponding discrete error 
+\begin_inset Formula $e_{i}^{k}$
+\end_inset
+
+ and residual 
+\begin_inset Formula $r_{i}^{k}$
+\end_inset
+
+ we rearrange Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:error_equation"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ to
+\begin_inset Formula 
+\begin{align}
+\epsilon_{m+1}^{k}-\epsilon_{m}^{k} & =I_{0}^{\tau_{m+1}}\left(u^{k},\epsilon^{k}\right)-I_{0}^{\tau_{m}}\left(u^{k},\epsilon^{k}\right)+r_{m+1}^{k}\\
+\epsilon_{m+1}^{k} & =\epsilon_{m}^{k}+I_{\tau_{m}}^{\tau_{m+1}}\left(u^{k},\epsilon^{k}\right)+r_{m+1}^{k}
+\end{align}
+
+\end_inset
+
+What's left is to find an approximation of the residual integral.
+ We can use again a spectral integration where we obtain
+\begin_inset Formula 
+\begin{align}
+r_{m+1} & =u_{m}+\int_{\tau_{m}}^{\tau_{m+1}}f\left(u^{k}(s),s\right)ds-u_{m+1}^{k}\\
+ & =\int_{\tau_{m}}^{\tau_{m+1}}f\left(u^{k}(s),s\right)ds-u_{m+1}^{k}+u_{m}^{k}\\
+ & \approx\sum_{1\leq i\leq M}s_{m,i}f\left(u_{i}^{k},\tau_{i}\right)ds-u_{m+1}^{k}+u_{m}^{k}
+\end{align}
+
+\end_inset
+
+with the coefficients given by
+\begin_inset Formula 
+\begin{equation}
+s_{m,j}=\int_{\tau_{m}}^{\tau_{m+1}}l_{j}(s)ds.\label{eq:spectral_integration_coefficients_p2p}
+\end{equation}
+
+\end_inset
+
+This reconstruction always includes all quadrature points.
+ Finally we get our SDC iteration by
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Box Boxed
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Formula 
+\begin{equation}
+\epsilon_{m+1}^{k}=\epsilon_{m}^{k}+I_{\tau_{m}}^{\tau_{m+1}}\left(u_{m}^{k},\epsilon_{m}^{k},s\right)+\sum_{1\leq i\leq M}s_{m,i}f\left(u_{i}^{k},\tau_{i}\right)ds-u_{m+1}^{k}+u_{m}^{k}.
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+u_{m}^{k+1}=u_{m}^{k}+\epsilon_{m}^{k}.
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The difference to the original SDC formulation is that we didn't yet specialize
+ this form on either explicit or implicit methods, but kept the general
+ integrator 
+\begin_inset Formula $R$
+\end_inset
+
+ in it which could be replace by whatever integrator.
+\end_layout
+
+\begin_layout Subsection
+Compact node-to-node
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:sdc_compact-node-to-node"
+
+\end_inset
+
+The next steps we describe here provides a by far more elegant formulation
+ and in particular compact formulation of the SDC method which avoids explicitly
+ setting up the error and residual.
+\end_layout
+
+\begin_layout Standard
+Using the 2nd equation 
+\begin_inset Formula $\epsilon_{m}^{k}=u_{m}^{k+1}-u_{m}^{k}$
+\end_inset
+
+ in the 1st one provides a more compact form (see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "minion_semi-implicit_2003,buvoli_class_2015"
+literal "false"
+
+\end_inset
+
+) where we obtain
+\begin_inset Formula 
+\[
+u_{m+1}^{k+1}\cancel{-u_{m+1}^{k}}=u_{m}^{k+1}\cancel{-u_{m}^{k}}+I_{\tau_{m}}^{\tau_{m+1}}\left(u_{m}^{k},u_{m}^{k+1}-u_{m}^{k}\right)+\sum_{1\leq i\leq M}s_{m,i}f\left(u_{i}^{k}\left(\tau_{i}\right),\tau_{i}\right)ds\cancel{-u_{m+1}^{k}}+\cancel{u_{m}^{k}}.
+\]
+
+\end_inset
+
+Then, we can write the time integrator even more compactly as
+\begin_inset Formula 
+\begin{align}
+I_{\tau_{m}}^{\tau_{m+1}}\left(u^{k},u^{k+1}-u^{k}\right) & \approx\int_{\tau_{m}}^{\tau_{m+1}}G(u^{k},u^{k+1}-u^{k},s)ds\\
+ & =\int_{\tau_{m}}^{\tau_{m+1}}f(u^{k}+u^{k+1}-u^{k},s)-f\left(u^{k}(s),s\right)ds\\
+ & =\int_{\tau_{m}}^{\tau_{m+1}}f(u^{k+1},s)-f\left(u^{k}(s),s\right)ds.
+\end{align}
+
+\end_inset
+
+Note that we didn't use any discretization on 
+\begin_inset Formula $u$
+\end_inset
+
+, yet, since this will depend on the time integrator.
+ Then, we obtain the compact notation which is also known as 
+\series bold
+node-to-node
+\series default
+ formulation
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Box Boxed
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Formula 
+\begin{equation}
+u_{m+1}^{k+1}=u_{m}^{k+1}+I_{\tau_{m}}^{\tau_{m+1}}\left[f(u^{k+1},s)\right]-I_{\tau_{m}}^{\tau_{m+1}}\left[f\left(u^{k},s\right)\right]+\sum_{1\leq i\leq M}s_{m,i}f\left(u_{i}^{k},\tau_{i}\right).\label{eq:compact-node-to-node}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Compact zero-to-node
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:sdc_compact-zero-to-node"
+
+\end_inset
+
+We can use this recursively to obtain the 
+\series bold
+zero-to-node
+\series default
+ formulation
+\begin_inset Formula 
+\begin{align}
+u_{m}^{k+1} & =u_{0}+\sum_{1\leq j\leq m-1}I_{\tau_{j}}^{\tau_{j+1}}\left[f(u^{k+1},s)\right]-I_{\tau_{j}}^{\tau_{j+1}}\left[f\left(u^{k},s\right)\right]+\sum_{1\leq i\leq M}q_{m,i}f\left(u_{i}^{k},\tau_{i}\right)\label{eq:compact-zero-to-node}
+\end{align}
+
+\end_inset
+
+with the matrix 
+\begin_inset Formula $Q$
+\end_inset
+
+ entries given by
+\begin_inset Formula 
+\begin{equation}
+q_{m,i}=\sum_{1\leq j\leq m-1}s_{j,i}
+\end{equation}
+
+\end_inset
+
+matrix 
+\begin_inset Formula $E$
+\end_inset
+
+ elements 
+\begin_inset Formula 
+\begin{equation}
+E=\left[\begin{array}{ccccc}
+1 & 0 & 0 & \cdots & 0\\
+1 & 1 & 0 & \cdots & 0\\
+1 & 1 & 1 & \cdots & 0\\
+\vdots & \vdots & \vdots & \ddots & \vdots\\
+1 & 1 & 1 & \cdots & 1
+\end{array}\right]
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula 
+\begin{equation}
+I\left[\cdot\right]=\left(I_{\tau_{0}}^{\tau_{1}}\left[\cdot\right],I_{\tau_{1}}^{\tau_{2}}\left[\cdot\right],...,I_{\tau_{M-1}}^{\tau_{M}}\left[\cdot\right]\right)
+\end{equation}
+
+\end_inset
+
+we can obtainand finally also the 
+\series bold
+matrix-based zero-to-node formulation
+\series default
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Box Boxed
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Formula 
+\begin{equation}
+U^{k+1}=U_{0}+E\left(I\left[F(U^{k+1},\tau)\right]-I\left[F(U^{k},\tau)\right]\right)+QF\left(U^{k}\right).\label{eq:matrix-zero-to-node}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Newline newline
+\end_inset
+
+Again, we like to emphasize that the integrator 
+\begin_inset Formula $I$
+\end_inset
+
+ is so far not specified and we will introduce it in the next section.
+\end_layout
+
+\begin_layout Subsection
+Closure methods
+\end_layout
+
+\begin_layout Standard
+The closure methods for SDC methods are the same as for the collocation
+ method and we refer to 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "subsec:collocation-closure-methods"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ for possible solutions.
+\end_layout
+
+\begin_layout Section
+Realization with compact node-to-node
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Realization-with-compact"
+
+\end_inset
+
+Next, we discuss different approaches to specialize the general SDC method
+ based on the compact node-to-node form 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:compact-node-to-node"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ introduced before to particular time integrators.
+ This basically replaces the integrator 
+\begin_inset Formula $I$
+\end_inset
+
+ with explicit, implicit and arbitrary time integrators either to the entire
+ tendencies or by splitting it into subterms of the form
+\begin_inset Formula 
+\[
+f(u,s)=f_{\text{explicit}}(u,s)+f_{\text{implicit}}(u,s)+f_{\text{integration}}(u,s)
+\]
+
+\end_inset
+
+where each term refers to the method how this term should be integrated.
+\end_layout
+
+\begin_layout Standard
+We use the nomenclature 
+\begin_inset Quotes eld
+\end_inset
+
+sweep
+\begin_inset Quotes erd
+\end_inset
+
+ which has been introduced to refer to one iteration of the SDC method from
+ 
+\begin_inset Formula $U^{k}$
+\end_inset
+
+ to 
+\begin_inset Formula $U^{k+1}$
+\end_inset
+
+ and to differentiate to the iteration from one time node 
+\begin_inset Formula $U_{m}$
+\end_inset
+
+ to 
+\begin_inset Formula $U_{m+1}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Initialization sweep
+\end_layout
+
+\begin_layout Standard
+The first sweep can be an arbitrary time integrator.
+ We can also take the perspective that this should be a good initial guess
+ to start the SDCs themselves.
+ The initial sweep starts at 
+\begin_inset Formula $\tau_{0}=0$
+\end_inset
+
+ and uses 
+\begin_inset Formula $M$
+\end_inset
+
+ iterations to time integrate solutions to 
+\begin_inset Formula $\tau_{M}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Depending on which particular time integrators will be used, some parts
+ have to be cached which will be discussed in the following individual sections.
+\end_layout
+
+\begin_layout Subsection
+SDC iteration
+\end_layout
+
+\begin_layout Standard
+For sake of better discussion, we give a recap of equation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:compact-node-to-node"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ here which we will follow:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+u_{m+1}^{k+1}=u_{m}^{k+1}+\underbrace{I_{\tau_{m}}^{\tau_{m+1}}\left[f(u^{k+1},s)\right]-I_{\tau_{m}}^{\tau_{m+1}}\left[f\left(u^{k},s\right)\right]}_{\text{Integrator correction}}+\underbrace{\sum_{1\leq i\leq M}s_{m,i}f\left(u_{i}^{k},\tau_{i}\right)}_{\text{Residual correction}}.
+\]
+
+\end_inset
+
+We split this into two main parts, the integrator correction which solely
+ depends on time integrators and the residual correction based on time tendencie
+s.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\emph on
+Implementation remarks
+\emph default
+:
+\end_layout
+
+\begin_layout Itemize
+For the residual correction, time tendency evaluations 
+\begin_inset Formula $f(u)$
+\end_inset
+
+ are obviously required.
+ Depending on which integrator correction is used, they are already to be
+ computed already for the integration correction itself, but might also
+ have to be computed just for this residual evaluation, depending on which
+ discretization of the integrator is used.
+\end_layout
+
+\begin_layout Itemize
+Two buffers are used to read the tendency terms 
+\begin_inset Formula $f(u^{k},s)$
+\end_inset
+
+ computed in the previous iteration and 
+\begin_inset Formula $f(u^{k+1},s)$
+\end_inset
+
+ to store the tendencies for the current iteration.
+\end_layout
+
+\begin_layout Itemize
+The first time step goes from 
+\begin_inset Formula $t=\tau_{0}=0$
+\end_inset
+
+ to 
+\begin_inset Formula $t=\tau_{1}$
+\end_inset
+
+, but not with a regular time integrator as we one would expect.
+ This is described in other implementation remarks below.
+\end_layout
+
+\begin_layout Subsubsection
+Explicit time integrators
+\end_layout
+
+\begin_layout Standard
+Using an explicit time integrator uses an approximation replaces the time
+ integrator with an explicit one, hence
+\begin_inset Formula 
+\[
+I_{\tau_{m}}^{\tau_{m+1}}\left[f_{\text{explicit}}(u^{k+1},s)\right]-I_{\tau_{m}}^{\tau_{m+1}}\left[f_{\text{explicit}}\left(u^{k},s\right)\right]=\Delta\tau_{m}f_{\text{explicit}}\left(u_{m}^{k+1},\tau_{m}\right)-\Delta\tau_{m}f_{\text{explicit}}\left(u_{m}^{k},\tau_{m}\right)
+\]
+
+\end_inset
+
+This can be computed straight-forward since the tendencies 
+\begin_inset Formula $f_{\text{explicit}}\left(u_{m}^{k},\tau_{m}\right)$
+\end_inset
+
+ have been computed in the previous iteration and 
+\begin_inset Formula $f_{\text{explicit}}\left(u_{m}^{k+1},\tau_{m}\right)$
+\end_inset
+
+ can be evaluated since 
+\begin_inset Formula $u_{m}^{k+1}$
+\end_inset
+
+ is known.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\emph on
+Implementation remark
+\emph default
+s:
+\end_layout
+
+\begin_layout Itemize
+For the first sweep and for efficiency reasons, some time tendencies were
+ computed (and buffered) in the initial sweep.
+ Then, during each sweep, all tendency evaluations are also buffered for
+ the next sweep.
+\end_layout
+
+\begin_layout Itemize
+For the first iteration, computing the correction for 
+\begin_inset Formula $u_{1}$
+\end_inset
+
+, 
+\series bold
+no evaluation (=correction) is required
+\series default
+ since both tendencies are evaluate at 
+\begin_inset Formula $u_{0}$
+\end_inset
+
+ which simply cancel out.
+\end_layout
+
+\begin_layout Itemize
+No special attention needs to be paid to the non-autonomous evaluations
+ here since the functions are always evaluated at 
+\begin_inset Formula $\tau_{m}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Implicit time integrators
+\end_layout
+
+\begin_layout Standard
+Implicit time integrators simply use the solution at the next point in time,
+ hence to integrate to 
+\begin_inset Formula $\tau_{m+1}$
+\end_inset
+
+, they use the solution at 
+\begin_inset Formula $u_{m+1}$
+\end_inset
+
+ which leads to this scheme:
+\end_layout
+
+\begin_layout Standard
+\noindent
+\begin_inset Formula 
+\[
+I_{\tau_{m}}^{\tau_{m+1}}\left[f_{\text{implicit}}(u^{k+1},s)\right]-I_{\tau_{m}}^{\tau_{m+1}}\left[f_{\text{implicit}}\left(u^{k},s\right)\right]=\Delta\tau_{m}f_{\text{implicit}}\left(u_{m+1}^{k+1},\tau_{m+1}\right)-\Delta\tau_{m}f_{\text{implicit}}\left(u_{m+1}^{k},\tau_{m+1}\right).
+\]
+
+\end_inset
+
+Although 
+\begin_inset Formula $f_{\text{implicit}}(u_{m+1}^{k})$
+\end_inset
+
+ seems to require an implicit evaluation at the next time step 
+\begin_inset Formula $\tau_{m+1}$
+\end_inset
+
+, it is already known from the previous iteration 
+\begin_inset Formula $k$
+\end_inset
+
+.
+ In particular, it is also required to be computed as part of the residual
+ corrections, hence, we can directly use it from there without any additional
+ evaluations required.
+ The only term requiring an implicit solve is then 
+\begin_inset Formula $f_{\text{implicit}}\left(u_{m+1}^{k+1},\tau_{m+1}\right)$
+\end_inset
+
+ which we solve by rearranging the entire equation (including the residual
+ corrections) and solve it to obtain 
+\begin_inset Formula $u_{m+1}^{k+1}$
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\emph on
+Implementation remarks
+\emph default
+:
+\end_layout
+
+\begin_layout Itemize
+Attention needs to be paid to non-autonomous functions since the implicit
+ time integration as well as the tendencies are evaluated at 
+\begin_inset Formula $\tau_{m+1}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+IMEX time integrators
+\end_layout
+
+\begin_layout Standard
+In what follows, we will describe one particular IMEX time integrator.
+ Different IMEX methods are possible and we will simply follow the approach
+ to treat them separately as
+\begin_inset Formula 
+\begin{eqnarray*}
+I_{\tau_{m}}^{\tau_{m+1}}\left[f(u^{k+1},s)\right]-I_{\tau_{m}}^{\tau_{m+1}}\left[f\left(u^{k},s\right)\right] & = & \Delta\tau_{m}f_{\text{implicit}}\left(u_{m+1}^{k+1},\tau_{m+1}\right)-\Delta\tau_{m}f_{\text{implicit}}\left(u_{m+1}^{k},\tau_{m+1}\right)\\
+ &  & +\Delta\tau_{m}f_{\text{explicit}}\left(u_{m}^{k+1},\tau_{m}\right)-\Delta\tau_{m}f_{\text{explicit}}\left(u_{m}^{k},\tau_{m}\right).
+\end{eqnarray*}
+
+\end_inset
+
+Solving for this is straightforward by first adding and subtracting the
+ explicit time tendencies, then the one for the implicit part followed by
+ applying the implicit solver for the term 
+\begin_inset Formula $f_{\text{implicit}}\left(u_{m+1}^{k+1},s\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Note, that this is just one particular implementation of an IMEX scheme
+ and this could be, e.g., part of the general time integrator discussed next.
+ We like to point out the compact matrix-based notation for this formulation
+ following 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ruprecht_spectral_2016"
+literal "false"
+
+\end_inset
+
+, given by
+\begin_inset Formula 
+\[
+U^{k+1}=U_{0}+Q_{\Delta}^{\text{explicit}}\left(F_{\text{explicit}}(U^{k+1},\tau)-F_{\text{explicit}}(U^{k},\tau)\right)+Q_{\Delta}^{\text{implicit}}\left(\underbrace{F_{\text{implicit}}(U^{k+1},\tau)}_{\text{Unknown \ensuremath{U^{k+1}} for next time steps}}-F_{\text{implicit}}(U^{k},\tau)\right)+QF\left(U^{k}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+\begin_inset Formula 
+\begin{eqnarray*}
+U^{k+1} & = & U_{0}+Q_{\Delta}^{\text{explicit}}\left(F_{\text{explicit}}(U^{k+1},\tau)-F_{\text{explicit}}(U^{k},\tau)\right)\\
+ &  & +Q_{\Delta}^{\text{implicit}}\left(\underbrace{F_{\text{implicit}}(U^{k+1},\tau)}_{\text{Unknown \ensuremath{U^{k+1}} for next time steps}}-F_{\text{implicit}}(U^{k},\tau)\right)+QF\left(U^{k}\right)
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+with
+\begin_inset Formula 
+\[
+Q_{\Delta}^{\text{fast}}=\left[\begin{array}{ccccc}
+\Delta\tau_{1}\\
+\Delta\tau_{1} & \Delta\tau_{2}\\
+\Delta\tau_{1} & \Delta\tau_{2} & \Delta\tau_{3}\\
+\vdots & \vdots & \vdots & \ddots\\
+\Delta\tau_{1} & \Delta\tau_{2} & \Delta\tau_{3} & \cdots & \Delta\tau_{M}
+\end{array}\right]\,\,\,\,\,\,Q_{\Delta}^{\text{slow}}=\left[\begin{array}{ccccc}
+0\\
+\Delta\tau_{1} & 0\\
+\Delta\tau_{1} & \Delta\tau_{2} & 0\\
+\vdots & \vdots & \vdots & \ddots\\
+\Delta\tau_{1} & \Delta\tau_{2} & \Delta\tau_{3} & \cdots & 0
+\end{array}\right].
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+General time integrators
+\end_layout
+
+\begin_layout Standard
+Using an arbitrary integrator requires just a few changes.
+ In principle, we simply need to follow the formulation
+\begin_inset Formula 
+\begin{equation}
+I_{\tau_{m}}^{\tau_{m+1}}\left[f(u^{k+1},s)\right]-I_{\tau_{m}}^{\tau_{m+1}}\left[f\left(u^{k},s\right)\right]
+\end{equation}
+
+\end_inset
+
+and replace each 
+\begin_inset Formula $I$
+\end_inset
+
+ with the corresponding time integration.
+ That's actually it if there wouldn't be some peculiarities for the implementati
+on.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\emph on
+Implementation remarks
+\emph default
+:
+\end_layout
+
+\begin_layout Itemize
+Each time integrator needs to be applied directly on the solution 
+\begin_inset Formula $u^{k}$
+\end_inset
+
+ without first applying the residual correction.
+\end_layout
+
+\begin_layout Itemize
+The term 
+\begin_inset Formula $I_{\tau_{m}}^{\tau_{m+1}}\left[f\left(u,s\right)\right]$
+\end_inset
+
+ only refers to the update to the solution 
+\begin_inset Formula $u_{m}$
+\end_inset
+
+, not to the estimated solution 
+\begin_inset Formula $u_{m+1}$
+\end_inset
+
+.
+ Using some arbitrary time integrator computing 
+\begin_inset Formula $u_{m+1}$
+\end_inset
+
+, we then get 
+\begin_inset Formula $I_{\tau_{m}}^{\tau_{m+1}}\left[f\left(u^{k},s\right)\right]=u_{m+1}-u_{m}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+For sake of efficiency, the integration 
+\begin_inset Formula $I_{\tau_{m}}^{\tau_{m+1}}\left[f\left(u^{k},s\right)\right]$
+\end_inset
+
+ itself is stored in a buffer to be reused in the next iteration.
+ Comparing the computational complexity of this method with the implicit
+ one requires just one additional subtract operation.
+\end_layout
+
+\begin_layout Subsubsection
+All-in-one
+\end_layout
+
+\begin_layout Standard
+The all-in-one method can finally assemble all components in different orders.
+ We recommend the following order:
+\end_layout
+
+\begin_layout Enumerate
+Partial evaluation of explicit time integrator: If an explicit time integrator
+ is used, we first need to evaluate the tendencies on 
+\begin_inset Formula $u^{k}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+General time integrator: We evaluate this first because we need the solution
+ 
+\begin_inset Formula $u^{k}$
+\end_inset
+
+ to evaluate it first.
+\end_layout
+
+\begin_layout Enumerate
+Residual corrections: Then, we apply the residual corrections.
+\end_layout
+
+\begin_layout Enumerate
+Explicit time integrator: The explicit time integrator can then be applied
+ based on the tendencies of the previous iteration and with results from
+ step 1.
+\end_layout
+
+\begin_layout Enumerate
+Implicit time integrator: This is applied in the same way as before.
+\end_layout
+
+\begin_layout Section
+Preconditioner-based SDC
+\end_layout
+
+\begin_layout Standard
+Taking the perspective of a fixed point iteration from Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:fixed-point-collocation"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ we can introduce a preconditioner (see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "speck_parallelizing_2017"
+literal "false"
+
+\end_inset
+
+).
+ Assuming that 
+\begin_inset Formula $U^{k}$
+\end_inset
+
+ approaches the exact solution, we know that the residual 
+\begin_inset Formula $r^{k}=U_{0}-\left(I-\Delta tQF\right)U^{k}$
+\end_inset
+
+ approaches zero.
+ Therefore, we could try to use a preconditioner 
+\begin_inset Formula $P$
+\end_inset
+
+ to get
+\begin_inset Formula 
+\begin{equation}
+U^{k+1}=U^{k}+P\underbrace{\left(U_{0}-\left(I-\Delta tQF\right)U^{k}\right)}_{=\text{residual}}
+\end{equation}
+
+\end_inset
+
+which would target accelerating the convergence speed of the iterations.
+\end_layout
+
+\begin_layout Subsection
+Derivation
+\end_layout
+
+\begin_layout Standard
+We can now choose a particular preconditioner, namely one which is based
+ on a particular matrix shape such as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+P=\left(I-\Delta tQ_{\Delta}F\right)^{-1}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $Q_{\Delta}$
+\end_inset
+
+ is of lower diagonal form.
+ Note, that later on we could replace 
+\begin_inset Formula $Q_{\Delta}F$
+\end_inset
+
+ with all kinds of different split preconditioners, e.g., 
+\begin_inset Formula $Q_{\Delta}F=\left(Q_{\Delta}^{\text{fast}}F^{\text{fast}}+Q_{\Delta}^{\text{slow}}F^{\text{slow}}\right)$
+\end_inset
+
+.
+ If we apply this preconditioner we obtain
+\begin_inset Formula 
+\begin{align}
+U^{k+1} & =U^{k}+\left(I-\Delta tQ_{\Delta}F\right)^{-1}\left(U_{0}-\left(I-\Delta tQF\right)U^{k}\right)\\
+\left(I-\Delta tQ_{\Delta}F\right)U^{k+1} & =\left(I-\Delta tQ_{\Delta}F\right)U^{k}+\left(U_{0}-\left(I-\Delta tQF\right)U^{k}\right)\\
+ & =U^{k}-\Delta tQ_{\Delta}FU^{k}+U_{0}-U^{k}+\Delta tQFU^{k}\\
+ & =-\Delta tQ_{\Delta}FU^{k}+U_{0}+\Delta tQFU^{k}\\
+\left(I-\Delta tQ_{\Delta}F\right)U^{k+1} & =U_{0}+\Delta t\left(Q-Q_{\Delta}\right)FU^{k}.
+\end{align}
+
+\end_inset
+
+Note the lower diagonal form of 
+\begin_inset Formula $Q_{\Delta}$
+\end_inset
+
+ allowing us to solve for 
+\begin_inset Formula $U^{k+1}$
+\end_inset
+
+ more conveniently.
+\end_layout
+
+\begin_layout Subsection
+Convergence speed
+\end_layout
+
+\begin_layout Standard
+We can investigate its convergence speed by assuming linearity of 
+\begin_inset Formula $F=\lambda$
+\end_inset
+
+, using its error 
+\begin_inset Formula $\epsilon^{k}=u^{k}-u^{*}$
+\end_inset
+
+ with 
+\begin_inset Formula $u^{*}$
+\end_inset
+
+ the exact numerical solution given by 
+\begin_inset Formula $u_{0}=\left(I-\Delta tQ\lambda\right)u^{*}$
+\end_inset
+
+.
+ We then obtain
+\begin_inset Formula 
+\begin{align}
+\left(I-\Delta tQ_{\Delta}\lambda\right)u^{k+1} & =u_{0}+\Delta t\left(Q-Q_{\Delta}\right)\lambda u^{k}\\
+\left(I-\Delta tQ_{\Delta}\lambda\right)u^{k+1}-\left(I-\Delta tQ\lambda\right)u^{*} & =\Delta t\left(Q-Q_{\Delta}\right)\lambda u^{k}\\
+\left(I-\Delta tQ_{\Delta}\lambda\right)u^{k+1}-\left(I-\Delta tQ_{\Delta}\lambda\right)u^{*}+\left(I-\Delta tQ_{\Delta}\lambda\right)u^{*}-\left(I-\Delta tQ\lambda\right)u^{*} & =\Delta t\left(Q-Q_{\Delta}\right)\lambda u^{k}\\
+\left(I-\Delta tQ_{\Delta}\lambda\right)e^{k+1}+\Delta t\left(Q-Q_{\Delta}\right)\lambda u^{*} & =\Delta t\left(Q-Q_{\Delta}\right)\lambda u^{k}\\
+\left(I-\Delta tQ_{\Delta}\lambda\right)e^{k+1} & =\Delta t\left(Q-Q_{\Delta}\right)\lambda\epsilon^{k}\\
+e^{k+1} & =\underbrace{\left(I-\Delta t\lambda Q_{\Delta}\right)^{-1}\Delta t\lambda\left(Q-Q_{\Delta}\right)}_{\text{iteration matrix }K}\epsilon^{k}.
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Preconditioner choices
+\end_layout
+
+\begin_layout Standard
+There are different choices of preconditioners.
+\end_layout
+
+\begin_layout Itemize
+Implicit Euler
+\begin_inset Formula 
+\begin{equation}
+Q_{\Delta}=\left[\begin{array}{cccc}
+\Delta\tau_{1}\\
+\Delta\tau_{1} & \Delta\tau_{2}\\
+\Delta\tau_{1} & \Delta\tau_{2} & \Delta\tau_{3}\\
+\cdots & \cdots & \cdots & \cdots
+\end{array}\right]
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+LU trick
+\begin_inset Formula 
+\begin{equation}
+Q_{\Delta}=U^{T}
+\end{equation}
+
+\end_inset
+
+for 
+\begin_inset Formula 
+\begin{equation}
+Q^{T}=LU.
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Parallel SDC:
+\begin_inset Formula 
+\begin{equation}
+Q_{\Delta}=diag(\hat{q})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "bibliography"
+options "bibtotoc,plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

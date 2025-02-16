@@ -1,0 +1,40 @@
+********************************************************************************
+Processing tagname sphere2d_data_diff_prog_phi_pert.res_norm_linf
+********************************************************************************
+********************************************************************************
+Group: ETDSDC(lg,ADDT(lc,n))_M1_LEGENDRE_N3
+	240.0	=>	3.5252e+00	convergence: ----	 expected: 2
+	120.0	=>	8.7793e-01	convergence: 2.01	 expected: 2
+	30.0	=>	5.4799e-02	convergence: 2.00	 expected: 2
+[OK]
+********************************************************************************
+Group: ETDSDC(lg,ADDT(lc,n))_M2_LEGENDRE_N2
+	240.0	=>	8.9904e+00	convergence: ----	 expected: 2
+	120.0	=>	2.4093e+00	convergence: 1.90	 expected: 2
+	60.0	=>	6.1319e-01	convergence: 1.97	 expected: 2
+	30.0	=>	1.5402e-01	convergence: 1.99	 expected: 2
+[OK]
+********************************************************************************
+Group: ETDSDC(lg,ADDT(lc,n))_M2_LEGENDRE_N3
+	240.0	=>	6.5511e-02	convergence: ----	 expected: 3
+	120.0	=>	8.0824e-03	convergence: 3.02	 expected: 3
+	60.0	=>	1.0465e-03	convergence: 2.95	 expected: 3
+	30.0	=>	7.5477e-04	convergence: 0.47	 expected: 3
+[OK]
+********************************************************************************
+Group: ETDSDC(lg,ADDT(lc,n))_M2_LEGENDRE_N4
+	240.0	=>	2.6722e-02	convergence: ----	 expected: 3
+	120.0	=>	3.3690e-03	convergence: 2.99	 expected: 3
+	60.0	=>	7.9903e-04	convergence: 2.08	 expected: 3
+	30.0	=>	7.3435e-04	convergence: 0.12	 expected: 3
+[OK]
+********************************************************************************
+Group: ETDSDC(lg,ADDT(lc,n))_M3_LEGENDRE_N3
+	240.0	=>	4.7607e-02	convergence: ----	 expected: 3
+	120.0	=>	3.5472e-03	convergence: 3.75	 expected: 3
+	60.0	=>	8.3831e-04	convergence: 2.08	 expected: 3
+	30.0	=>	7.3224e-04	convergence: 0.20	 expected: 3
+[OK]
+********************************************************************************
+Convergence tests successful
+********************************************************************************

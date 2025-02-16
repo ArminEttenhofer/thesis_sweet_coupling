@@ -1,0 +1,71 @@
+/*
+ * Author: Martin SCHREIBER <schreiberx@gmail.com>
+ */
+
+#ifndef INCLUDE_SWEET_DATA_SPHERE2D_CONVERT_DATASPECTRAL_2_CART2D_DATAGRID_HPP
+#define INCLUDE_SWEET_DATA_SPHERE2D_CONVERT_DATASPECTRAL_2_CART2D_DATAGRID_HPP
+
+#include <sweet/Data/Cart2D/DataGrid.hpp>
+#include <sweet/Data/Sphere2D/DataSpectral.hpp>
+#include <sweet/Parallelization/openmp_helper.hpp>
+
+
+namespace sweet {
+namespace Data {
+namespace Sphere2D {
+namespace Convert {
+
+
+/*!
+ * \brief Convert from Sphere2D::DataSpectral to Cart2D::DataGrid
+ */
+class DataSpectral_2_Cart2D_DataGrid
+{
+public:
+	static
+	Cart2D::DataGrid convert(
+			const Sphere2D::DataSpectral &i_sphere2DDataSpectral,
+			Cart2D::Config &i_cart2DDataConfig
+	)
+	{
+		return convert(i_sphere2DDataSpectral, &i_cart2DDataConfig);
+	}
+
+
+public:
+	static
+	Cart2D::DataGrid convert(
+			const Sphere2D::DataSpectral &i_sphere2DDataSpectral,
+			Cart2D::Config *i_cart2DDataConfig
+	)
+	{
+		SWEET_ASSERT(i_sphere2DDataSpectral.sphere2DDataConfig->grid_num_lon == (int)i_cart2DDataConfig->grid_res[0]);
+		SWEET_ASSERT(i_sphere2DDataSpectral.sphere2DDataConfig->grid_num_lat == (int)i_cart2DDataConfig->grid_res[1]);
+		SWEET_ASSERT(i_cart2DDataConfig->grid_number_elements == i_sphere2DDataSpectral.sphere2DDataConfig->grid_number_elements);
+
+		Sphere2D::DataGrid i_sphere2DData = i_sphere2DDataSpectral.toGrid();
+
+		Cart2D::DataGrid out(i_cart2DDataConfig);
+
+
+
+#if SPHERE2D_DATA_GRID_LAYOUT	== SPHERE2D_DATA_LAT_CONTIGUOUS
+
+		SWEET_THREADING_SPACE_PARALLEL_FOR_SIMD_COLLAPSE2
+		for (int i = 0; i < i_sphere2DData.sphere2DDataConfig->grid_num_lon; i++)
+			for (int j = 0; j < i_sphere2DData.sphere2DDataConfig->grid_num_lat; j++)
+				out.grid_space_data[(i_sphere2DData.sphere2DDataConfig->grid_num_lat-1-j)*i_sphere2DData.sphere2DDataConfig->grid_num_lon + i] = i_sphere2DData.grid_space_data[i*i_sphere2DData.sphere2DDataConfig->grid_num_lat + j];
+#else
+		SWEET_THREADING_SPACE_PARALLEL_FOR_SIMD_COLLAPSE2
+		for (int j = 0; j < i_sphere2DData.sphere2DDataConfig->grid_num_lat; j++)
+			for (int i = 0; i < i_sphere2DData.sphere2DDataConfig->grid_num_lon; i++)
+				out.grid_space_data[(i_sphere2DData.sphere2DDataConfig->grid_num_lat-1-j)*i_sphere2DData.sphere2DDataConfig->grid_num_lon + i] = i_sphere2DData.grid_space_data[j*i_sphere2DData.sphere2DDataConfig->grid_num_lon + i];
+#endif
+
+		return out;
+	}
+};
+
+}}}}
+
+#endif

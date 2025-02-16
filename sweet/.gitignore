@@ -1,0 +1,65 @@
+
+# Build output directory
+/build
+
+**/params_SDC*
+
+# Plans
+**/shtns_cfg
+**/shtns_cfg_fftw
+**/sweet_fftw
+
+# All kinds of temporary files and directories
+**/*.mod
+**/*.out
+**/*~
+**/*.eps
+**/*.swo
+**/*.directory
+**/*.swp
+**/*.lyx#
+**/*.o
+**/_archive
+
+# Python caches
+**/*.pyc
+**/__pycache__
+
+# All kinds of job files
+**/job_benchref_*
+**/job_bench_*
+**/job_plan*
+**/job_shplan*
+**/job_output*
+
+# All kinds of output files
+**/output_*
+
+# MULE's local configuration
+mule_local_platform.conf
+
+
+# Exclude platform compile scripts
+**/compile_platform*.sh
+
+# Eclipse
+.cproject
+.gitignore.swp
+.project
+.pydevproject
+.sconsign.dblite
+.settings/
+.vscode
+.env
+*.spyproject
+
+
+# Exclude output files
+**/*.sweet
+**/*.csv
+
+# Avoid platform specific information
+./sweet_platform_user_specific_config.py
+
+# Exclude xbraid output files
+braid.out.cycle

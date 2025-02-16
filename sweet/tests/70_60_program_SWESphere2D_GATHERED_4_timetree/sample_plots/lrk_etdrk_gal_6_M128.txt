@@ -1,0 +1,61 @@
+********************************************************************************
+Processing tagname sphere2d_data_diff_prog_phi_pert.res_norm_linf
+********************************************************************************
+********************************************************************************
+Group: ETDRK(lg,ADDT(lc,n),o=2)
+	15360.0	=>	nan	convergence: ----	 expected: 2
+	7680.0	=>	nan	convergence: ----	 expected: 2
+	3840.0	=>	nan	convergence: ----	 expected: 2
+	1920.0	=>	nan	convergence: ----	 expected: 2
+	960.0	=>	nan	convergence: ----	 expected: 2
+	360.0	=>	3.9921e+01	convergence: ----	 expected: 2
+	120.0	=>	5.3843e+00	convergence: 1.82	 expected: 2
+	60.0	=>	1.3626e+00	convergence: 1.98	 expected: 2
+[OK]
+********************************************************************************
+Group: ETDRK(lg,ADDT(lc,n),o=4)
+	15360.0	=>	nan	convergence: ----	 expected: 4
+	7680.0	=>	nan	convergence: ----	 expected: 4
+	3840.0	=>	nan	convergence: ----	 expected: 4
+	1920.0	=>	1.8838e+02	convergence: ----	 expected: 4
+	960.0	=>	1.3108e+01	convergence: 3.85	 expected: 4
+	360.0	=>	5.0017e-01	convergence: 3.33	 expected: 4
+	120.0	=>	7.4122e-03	convergence: 3.83	 expected: 4
+	60.0	=>	1.0796e-03	convergence: 2.78	 expected: 4
+[OK]
+********************************************************************************
+Group: LRK(lg,ADDT(lc,n),o=2)
+	15360.0	=>	nan	convergence: ----	 expected: 2
+	7680.0	=>	nan	convergence: ----	 expected: 2
+	3840.0	=>	nan	convergence: ----	 expected: 2
+	1920.0	=>	nan	convergence: ----	 expected: 2
+	960.0	=>	nan	convergence: ----	 expected: 2
+	360.0	=>	3.3316e+02	convergence: ----	 expected: 2
+	120.0	=>	1.3623e+01	convergence: 2.91	 expected: 2
+	60.0	=>	2.1312e+00	convergence: 2.68	 expected: 2
+[OK]
+********************************************************************************
+Group: LRK(lg,ADDT(lc,n),o=3)
+	15360.0	=>	nan	convergence: ----	 expected: 3
+	7680.0	=>	nan	convergence: ----	 expected: 3
+	3840.0	=>	nan	convergence: ----	 expected: 3
+	1920.0	=>	nan	convergence: ----	 expected: 3
+	960.0	=>	nan	convergence: ----	 expected: 3
+	360.0	=>	6.1473e+01	convergence: ----	 expected: 3
+	120.0	=>	2.3171e+00	convergence: 2.98	 expected: 3
+	60.0	=>	2.8969e-01	convergence: 3.00	 expected: 3
+[OK]
+********************************************************************************
+Group: LRK(lg,ADDT(lc,n),o=4)
+	15360.0	=>	nan	convergence: ----	 expected: 4
+	7680.0	=>	nan	convergence: ----	 expected: 4
+	3840.0	=>	nan	convergence: ----	 expected: 4
+	1920.0	=>	nan	convergence: ----	 expected: 4
+	960.0	=>	3.9390e+02	convergence: ----	 expected: 4
+	360.0	=>	8.9413e-01	convergence: 6.21	 expected: 4
+	120.0	=>	4.1388e-03	convergence: 4.89	 expected: 4
+	60.0	=>	5.3793e-04	convergence: 2.94	 expected: 4
+[OK]
+********************************************************************************
+Convergence tests successful
+********************************************************************************

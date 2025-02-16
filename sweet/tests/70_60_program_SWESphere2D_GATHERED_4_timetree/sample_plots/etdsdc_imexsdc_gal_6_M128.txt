@@ -1,0 +1,85 @@
+ETDSDC, IMEXSDC, Galewsky 6 days M128, phi pert
+********************************************************************************
+Processing tagname sphere2d_data_diff_prog_phi_pert.res_norm_linf
+********************************************************************************
+********************************************************************************
+Group: 2__ETDSDC(lg,ADDT(lc,n))
+	7680.0	=>	nan	convergence: ----	 expected: 2
+	5760.0	=>	nan	convergence: ----	 expected: 2
+	3840.0	=>	nan	convergence: ----	 expected: 2
+	1920.0	=>	nan	convergence: ----	 expected: 2
+	1440.0	=>	nan	convergence: ----	 expected: 2
+	960.0	=>	nan	convergence: ----	 expected: 2
+	720.0	=>	nan	convergence: ----	 expected: 2
+	360.0	=>	3.9921e+01	convergence: ----	 expected: 2
+	240.0	=>	1.9875e+01	convergence: 1.72	 expected: 2
+	120.0	=>	5.3843e+00	convergence: 1.88	 expected: 2
+	60.0	=>	1.3626e+00	convergence: 1.98	 expected: 2
+********************************************************************************
+Group: 2__SDC_Classic(lg,ADDT(lc,n))
+	7680.0	=>	nan	convergence: ----	 expected: 2
+	5760.0	=>	nan	convergence: ----	 expected: 2
+	3840.0	=>	nan	convergence: ----	 expected: 2
+	1920.0	=>	nan	convergence: ----	 expected: 2
+	1440.0	=>	nan	convergence: ----	 expected: 2
+	960.0	=>	nan	convergence: ----	 expected: 2
+	720.0	=>	nan	convergence: ----	 expected: 2
+	360.0	=>	3.3411e+02	convergence: ----	 expected: 2
+	240.0	=>	3.0720e+02	convergence: 0.21	 expected: 2
+	120.0	=>	1.8763e+02	convergence: 0.71	 expected: 2
+	60.0	=>	1.1753e+02	convergence: 0.67	 expected: 2
+********************************************************************************
+Group: 3__ETDSDC(lg,ADDT(lc,n))
+	7680.0	=>	nan	convergence: ----	 expected: 3
+	5760.0	=>	nan	convergence: ----	 expected: 3
+	3840.0	=>	nan	convergence: ----	 expected: 3
+	1920.0	=>	nan	convergence: ----	 expected: 3
+	1440.0	=>	nan	convergence: ----	 expected: 3
+	960.0	=>	9.0640e+00	convergence: ----	 expected: 3
+	720.0	=>	3.4603e+00	convergence: 3.35	 expected: 3
+	360.0	=>	2.3024e-01	convergence: 3.91	 expected: 3
+	240.0	=>	6.5511e-02	convergence: 3.10	 expected: 3
+	120.0	=>	8.0824e-03	convergence: 3.02	 expected: 3
+	60.0	=>	1.0465e-03	convergence: 2.95	 expected: 3
+********************************************************************************
+Group: 3__SDC_Classic(lg,ADDT(lc,n))
+	7680.0	=>	nan	convergence: ----	 expected: 3
+	5760.0	=>	nan	convergence: ----	 expected: 3
+	3840.0	=>	nan	convergence: ----	 expected: 3
+	1920.0	=>	nan	convergence: ----	 expected: 3
+	1440.0	=>	3.6249e+02	convergence: ----	 expected: 3
+	960.0	=>	3.0634e+02	convergence: 0.42	 expected: 3
+	720.0	=>	2.3342e+02	convergence: 0.94	 expected: 3
+	360.0	=>	2.2500e+02	convergence: 0.05	 expected: 3
+	240.0	=>	1.6056e+02	convergence: 0.83	 expected: 3
+	120.0	=>	2.0057e+01	convergence: 3.00	 expected: 3
+	60.0	=>	2.7728e+00	convergence: 2.85	 expected: 3
+********************************************************************************
+Group: 4__ETDSDC(lg,ADDT(lc,n))
+	7680.0	=>	nan	convergence: ----	 expected: 4
+	5760.0	=>	nan	convergence: ----	 expected: 4
+	3840.0	=>	nan	convergence: ----	 expected: 4
+	1920.0	=>	nan	convergence: ----	 expected: 4
+	1440.0	=>	nan	convergence: ----	 expected: 4
+	960.0	=>	nan	convergence: ----	 expected: 4
+	720.0	=>	1.4736e-01	convergence: ----	 expected: 4
+	360.0	=>	4.0123e-03	convergence: 5.20	 expected: 4
+	240.0	=>	8.8096e-04	convergence: 3.74	 expected: 4
+	120.0	=>	7.2620e-04	convergence: 0.28	 expected: 4
+	60.0	=>	7.2512e-04	convergence: 0.00	 expected: 4
+********************************************************************************
+Group: 4__SDC_Classic(lg,ADDT(lc,n))
+	7680.0	=>	nan	convergence: ----	 expected: 4
+	5760.0	=>	nan	convergence: ----	 expected: 4
+	3840.0	=>	nan	convergence: ----	 expected: 4
+	1920.0	=>	2.6373e+02	convergence: ----	 expected: 4
+	1440.0	=>	2.0530e+02	convergence: 0.87	 expected: 4
+	960.0	=>	1.9453e+02	convergence: 0.13	 expected: 4
+	720.0	=>	1.8875e+02	convergence: 0.10	 expected: 4
+	360.0	=>	3.5789e+01	convergence: 2.40	 expected: 4
+	240.0	=>	1.5522e+01	convergence: 2.06	 expected: 4
+	120.0	=>	6.1233e-01	convergence: 4.66	 expected: 4
+	60.0	=>	3.6184e-02	convergence: 4.08	 expected: 4
+********************************************************************************
+Convergence tests successful
+********************************************************************************

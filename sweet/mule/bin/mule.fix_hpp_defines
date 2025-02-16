@@ -1,0 +1,73 @@
+#! /usr/bin/env python3
+
+import sys
+import re
+
+if len(sys.argv) <= 1:
+    print("This script fixed header file #ifndef...#define...#endif")
+    print(f"Usage: {sys.argv[0]} [file1.hpp] [file2.hpp]")
+
+for f in sys.argv[1:]:
+    
+    output_content = ""
+
+    tag = f[:]
+    while tag[0] == "." or tag[0] == "/":
+        tag = tag[1:]
+    tag = tag.replace("/", "_")
+    tag = tag.replace(".", "_")
+    tag = tag.upper()
+
+    # Open the input and output files
+    print(f"Processing file '{f}'")
+    print(f" + Using {tag}")
+    with open(f, "r") as file:
+        lines = file.readlines()
+
+        # Search for first #ifndef tag
+        found = False
+        already_processed = False
+        for i in range(0, len(lines)):
+            if lines[i].startswith("#ifndef "):
+                new_line = f"#ifndef {tag}\n"
+
+                if lines[i] == new_line:
+                    already_processed = True
+                    found = True
+                    break
+                else:
+                    lines[i] = f"#ifndef {tag}\n"
+
+                if not lines[i+1].startswith("#define "):
+                    raise Exception("#define not found after first #ifndef")
+
+                lines[i+1] = f"#define {tag}\n"
+
+                found = True
+                break
+
+        if not found:
+            raise Exception("First #ifndef not found")
+
+        found = False
+        for i in range(len(lines)-1, -1, -1):
+            if lines[i].startswith("#endif"):
+                lines[i] = f"#endif\n"
+
+                found = True
+                break
+
+        if not found:
+            raise Exception("Last #endif not found")
+
+        if already_processed:
+            print(" + OK (already processed)")
+        else:
+            print(" + OK")
+
+    output_content = "".join(lines)
+
+    with open(f, "w") as file:
+        file.write(output_content)
+
+

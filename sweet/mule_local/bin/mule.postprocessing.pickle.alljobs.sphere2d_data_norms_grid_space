@@ -1,0 +1,148 @@
+#! /usr/bin/env python3
+
+import sys
+import math
+import glob
+
+from mule.postprocessing.JobData import *
+from mule.postprocessing.JobsData import *
+from mule.postprocessing.Sphere2DDataNormsGridSpace import *
+from mule.parhelper import *
+import mule.utils
+import mule.postprocessing.utils
+
+
+"""
+Steps:
+* Iterate over given directories (or autodetect them)
+
+* For each directory:
+
+  * Search for reference job
+
+  * Determine output files:
+    * Search for reference files in reference job output
+    * Otherwise, use all output files in reference job with output files in this directory
+
+  * Compute differences in different norms
+
+  * Write pickle file
+"""
+
+
+def _get_job(i_job_id):
+    for job_id, value in jobs_data.items():
+        if job_id == i_job_id:
+            return value
+
+    raise Exception(f"Fatal: job with id {i_job_id} not found")
+
+
+def _process_job(job_id, job_data):
+    print(f" - job_id: {job_id}")
+
+    has_reference_job_info = False
+
+    #
+    # Skip postprocessing if requested
+    # This can be used, e.g., by jobs which generate tranformation plans or reference data
+    #
+    if 'jobgeneration.skip_postprocessing' in job_data:
+        if job_data['jobgeneration.skip_postprocessing']:
+            return
+
+    #
+    # Sort out jobs which don't have a reference job id
+    # These jobs are likely the reference jobs themselves
+    #
+    if 'jobgeneration.reference_job_unique_id' not in job_data:
+        if 'jobgeneration.reference_job' not in job_data:
+            raise Exception("No reference job information found in job data")
+
+        if not job_data['jobgeneration.reference_job']:
+            print(job_data)
+            raise Exception("Job has no reference job information and is no reference job!")
+
+        print("   - reference job detected, ignoring this one")
+        return
+
+    reference_job_unique_id = job_data['jobgeneration.reference_job_unique_id']
+
+    print(f"  - reference_job_unique_id: {reference_job_unique_id}")
+
+    #
+    # We now identified the reference job
+    #
+
+    # Load reference job
+    ref_job_data = _get_job(reference_job_unique_id)
+
+    ref_output_files = []
+
+    #
+    # Try to identify the output files to process from the reference job itself
+    if 'output.reference_filenames' in ref_job_data:
+        if ref_job_data['output.reference_filenames'] != "":
+            ref_output_files = ref_job_data['output.reference_filenames'].split(";")
+
+    if len(ref_output_files) == 0:
+
+        # Try to load job data from regular job
+        ref_output_files = mule.postprocessing.utils.get_job_output_files(job_data)
+
+        if len(ref_output_files) == 0:
+            print("No reference files found!")
+            print("*"*80)
+            print("Reference directory: "+ref_job_data['jobgeneration.job_dirpath'])
+            print("*"*80)
+            raise Exception("Reference files not found!")
+
+    print("   - reference output files: "+str(ref_output_files))
+
+    for ref_output_file in ref_output_files:
+        print(f"   - computing diff for: {ref_output_file}")
+
+        s = None
+        try:
+            s = Sphere2DDataNormsGridSpace(
+                    ref_job_data['jobgeneration.job_dirpath']+'/'+ref_output_file,
+                    job_data['jobgeneration.job_dirpath']+'/'+ref_output_file,
+                    verbosity = 0,
+                    output_prefix = "    "
+            )
+
+        except Exception as e:
+            print(str(e))
+            print("Error occured which is ignored (missing files are ignored)")
+            return
+
+        s.print("     - ")
+
+        basename = mule.utils.remove_file_ending(ref_output_file)
+        pickle_filename = 'sphere2d_data_norms_grid_space_'+basename+'.pickle'
+
+        print(f"  - writing file {pickle_filename}")
+        s.write_file(job_data['jobgeneration.job_dirpath']+'/'+pickle_filename, verbosity=1)
+
+    print("")
+
+
+if len(sys.argv) > 1:
+    j = JobsData(job_dirs = sys.argv[1:], verbosity=0)
+
+else:
+    jobdir_pattern = './job_*'
+    j = JobsData(jobdir_pattern, verbosity=0)
+
+
+# Get a list of all job information
+jobs_data = j.get_flattened_data()
+
+if len(jobs_data) == 0:
+    raise Exception("No jobs found!")
+
+
+for job_id, value in jobs_data.items():
+    _process_job(job_id, value)
+
+

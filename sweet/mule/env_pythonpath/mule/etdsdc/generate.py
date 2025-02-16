@@ -1,0 +1,1 @@
+../../../../mule_local/python/etdsdc/generate.py

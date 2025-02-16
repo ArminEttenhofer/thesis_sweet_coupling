@@ -1,0 +1,183 @@
+
+
+@book{hairer_solving_1987,
+  author =        {Hairer, Ernst and Norsett, S.P. and Wanner, Gerhard},
+  title =         {Solving ordinary differential equations {I}:
+                   {Nonstiff} problems},
+  year =          {1987},
+}
+
+@article{dutt_spectral_1998,
+  author =        {Dutt, Alok and Greengard, Leslie and
+                   Rokhlin, Vladimir},
+  number =        {2},
+  pages =         {1--26},
+  title =         {Spectral {Deferred} {Correction} {Methods} for
+                   {Ordinary}},
+  volume =        {40},
+  year =          {1998},
+}
+
+@article{minion_semi-implicit_2003,
+  author =        {Minion, Michael L.},
+  journal =       {Communications in Mathematical Sciences},
+  note =          {ISBN: 978-960-474-071-0},
+  number =        {3},
+  pages =         {471--500},
+  title =         {Semi-implicit spectral deferred correction methods
+                   for ordinary differential equations},
+  volume =        {1},
+  year =          {2003},
+  abstract =      {A semi-implicit formulation of the method of spectral
+                   deferred corrections (SISDC) for ordinary
+                   differential equations with both stiff and non-stiff
+                   terms is presented. Several modifications and
+                   variations to the original spectral deferred
+                   corrections method by Dutt, Greengard, and Rokhlin
+                   concerning the choice of integration points and the
+                   form of the correction iteration are presented. The
+                   stability and accuracy of the resulting ODE methods
+                   for both stiff and nonstiff problems are explored
+                   analytically and numerically. The SISDC methods are
+                   intended to be combined with the method of lines
+                   approach to yield a flexible framework for creating
+                   higher-order semi-implicit methods for partial
+                   differential equations. A discussion and numerical
+                   examples of the SISDC method applied to
+                   advection-diffusion type equations are included. The
+                   results suggest that higher-order SISDC methods are a
+                   competitive alternative to existing Runge-Kutta and
+                   linear multistep methods based on the accuracy per
+                   function evaluation.},
+  doi =           {10.4310/CMS.2003.v1.n3.a6},
+  issn =          {15396746},
+  url =           {http://www.intlpress.com/site/pub/pages/journals/items/cms/
+                  content/vols/0001/0003/a006/},
+}
+
+@article{buvoli_class_2015,
+  author =        {Buvoli, Tommaso},
+  note =          {\_eprint: 1504.05543},
+  pages =         {1--22},
+  title =         {A {Class} of {Exponential} {Integrators} {Based} on
+                   {Spectral} {Deferred} {Correction}},
+  year =          {2015},
+  abstract =      {We introduce a new class of arbitrary-order
+                   exponential time differencing methods based on
+                   spectral deferred correction (ETDSDC) and describe a
+                   simple procedure for initializing the requisite
+                   matrix functions. We compare the stability and
+                   accuracy properties of our ETDSDC meth- ods to those
+                   of an existing implicit-explicit spectral deferred
+                   correction scheme (IMEXSDC). We find that ETDSDC
+                   methods have larger accuracy regions and comparable
+                   stability regions. We conduct numerical experiments
+                   to compare ETD and IMEX spectral deferred correction
+                   schemes against a competing fourth-order ETD
+                   Runge-Kutta scheme. We find that high-order ETDSDC
+                   schemes are the most efficient in terms of function
+                   evaluations and overall speed when solving partial
+                   differential equations to high accuracy. Our results
+                   suggest that high-order ETDSDC schemes are
+                   well-suited to work in conjunction with spectral
+                   spatial methods or other high-order spatial
+                   discritizations. Addi- tionally, ETDSDC schemes
+                   appear to be immune to severe order reduction, a
+                   problem which affects other ETD and IMEX schemes,
+                   including IMEXSDC.},
+  url =           {http://arxiv.org/abs/1504.05543},
+}
+
+@article{ruprecht_spectral_2016,
+  author =        {Ruprecht, Daniel and Speck, Robert},
+  journal =       {SIAM Journal on Scientific Computing},
+  note =          {ISBN: 0001405101 \_eprint: arXiv:1302.5877},
+  number =        {4},
+  pages =         {A2535--A2557},
+  title =         {Spectral {Deferred} {Corrections} with {Fast}-wave
+                   {Slow}-wave {Splitting}},
+  volume =        {38},
+  year =          {2016},
+  abstract =      {The paper investigates a variant of semi-implicit
+                   spectral deferred corrections (SISDC) in which the
+                   stiff, fast dynamics correspond to fast propagating
+                   waves ("fast-wave slow-wave prob-lem"). We show that
+                   for a scalar test problem with two imaginary
+                   eigenvalues iλ f , iλs, having ∆t ({\textbar}λ f
+                   {\textbar} + {\textbar}λs{\textbar}) {\textless} 1
+                   is sufficient for the fast-wave slow-wave SDC
+                   (fwsw-SDC) iteration to converge and that in the
+                   limit of infinitely fast waves the convergence rate
+                   of the non-split version is retained. Stability
+                   function and discrete dispersion relation are derived
+                   and show that the method is stable for essentially
+                   arbitrary fast-wave CFL numbers as long as the slow
+                   dynamics are resolved. The method causes little
+                   numerical diffusion and its semi-discrete phase speed
+                   is accurate also for large wave number modes.
+                   Performance is studied for an acoustic-advection
+                   problem and for the linearised Boussinesq equations,
+                   describing compressible, stratified flow. fwsw-SDC is
+                   compared to a diagonally implicit Runge-Kutta (DIRK)
+                   and IMEX Runge-Kutta (IMEX) method and found to be
+                   competitive in terms of both accuracy and cost. 1.
+                   Introduction. For simulations of compressible flow,
+                   in particular in numerical weather prediction and
+                   climate simulations, the presence of acoustic waves
+                   can pose significant numerical challenges to the time
+                   integration method. Explicit methods are restricted
+                   to inefficiently small steps while fully implicit
+                   methods are expensive and can artificially slow down
+                   high wave number modes. The fully compressible
+                   equations can be replaced by filtered models that do
+                   not support sound waves [9, 30], but these require
+                   solution of a Poisson problem in each step and have
+                   difficulties capturing large-scale wave dynamics [8].
+                   Therefore, a widely used class of methods are
+                   split-explicit integrators: they separate the
+                   equation into fast and slow processes which are then
+                   integrated with different time step sizes and
+                   different (explicit) methods. A popular method of
+                   this type is a third-order Runge-Kutta scheme
+                   combined with a forward-backward Euler integrator for
+                   the acoustic terms [45]. While computationally
+                   efficient, split-explicit methods typically require
+                   some form of damping for stabilisation [3], which
+                   reduces their effective order of accuracy. However, a
+                   second-order split-explicit two-step peer method has
+                   recently been derived that allows for stable
+                   integration of the compressible Euler equations
+                   without damping [23]. Another form of splitting are
+                   semi-implicit methods. They also split the equations
+                   into fast and slow parts but then use an implicit
+                   method for the fast and an explicit method for the
+                   slow part. In many applications, the fast, stiff
+                   terms stem from diffusion and/or rapid chemical
+                   reactions and methods with IMEX splitting for
+                   equations of reaction-diffusion type have been widely
+                   studied [24, 29, 34]. For stratified, com-pressible
+                   flows, however, the fast dynamics are not diffusive
+                   but stem from acoustic and fast gravity waves while
+                   the slow dynamics correspond to slower waves and
+                   advec-tion. IMEX splitting methods for such
+                   "fast-wave slow-wave" problems [11] have not been as
+                   widely studied. Some literature does exist [15, 43],
+                   however, and early works go back to the 1970's [25,
+                   39]. The performance of IMEX Runge-Kutta methods has},
+  doi =           {10.1137/16M1060078},
+  issn =          {1064-8275},
+  url =           {http://epubs.siam.org/doi/10.1137/16M1060078},
+}
+
+@article{speck_parallelizing_2017,
+	title = {Parallelizing spectral deferred corrections across the method},
+	url = {http://arxiv.org/abs/1703.08079},
+	abstract = {In this paper we present two strategies to enable "parallelization across the method" for spectral deferred corrections (SDC). Using standard low-order time-stepping methods in an iterative fashion, SDC can be seen as preconditioned Picard iteration for the collocation problem. Typically, a serial Gauss-Seidel-like preconditioner is used, computing updates for each collocation node one by one. The goal of this paper is to show how this process can be parallelized, so that all collocation nodes are updated simultaneously. The first strategy aims at finding parallel preconditioners for the Picard iteration and we test three choices using four different test problems. For the second strategy we diagonalize the quadrature matrix of the collocation problem directly. In order to integrate non-linear problems we employ simplified and inexact Newton methods. Here, we estimate the speed of convergence depending on the time-step size and verify our results using a non-linear diffusion problem.},
+	journal = {Computing and Visualization in Science},
+	author = {Speck, Robert},
+	month = mar,
+	year = {2017},
+	note = {\_eprint: 1703.08079},
+	file = {Attachment:/home/martin/Documents/Zotero/storage/A7PY7ZTR/Speck - 2017 - Parallelizing spectral deferred corrections across the method.pdf:application/pdf;Speck - 2018 - Parallelizing spectral deferred corrections across.pdf:/home/martin/Documents/Zotero/storage/AR4EQTVX/Speck - 2018 - Parallelizing spectral deferred corrections across.pdf:application/pdf},
+}
+

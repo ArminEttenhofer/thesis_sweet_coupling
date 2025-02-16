@@ -1,0 +1,42 @@
+#! /bin/bash
+#
+echo ""
+echo "Building the Docker images is very time consuming and should only be done if really required."
+echo "Also, this could break the build system."
+echo "Only do this if you're really sure if you know what you're doing!"
+echo ""
+read -p "Please enter YES to continue: " userInput
+
+if [[ "$userInput" != "YES" ]]; then
+    echo "Stopping..."
+    exit 1
+fi
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+echo "Sending Docker build for branch '$BRANCH'..."
+
+curl		\
+	-X POST	\
+	--fail	\
+	--no-progress-meter	\
+	-F token=glptt-2eea8313f4c7eff703d701f86dd42cfed71a0ef1	\
+	-F ref=$BRANCH					\
+	-F "variables[DOCKER_BUILD]=true"		\
+	-F "variables[RUN_TESTS]=false" 		\
+	https://gitlab.inria.fr/api/v4/projects/45891/trigger/pipeline	\
+	> /dev/null
+
+if [[ $? -eq 0 ]]; then
+	echo ""
+	echo ""
+	echo "CI pipeline triggered successfully"
+	echo ""
+	echo "Check out https://gitlab.inria.fr/mschreib/sweet-ci-tests/-/pipelines"
+	echo ""
+else
+	echo ""
+	echo "ERROR"
+	echo "ERROR: Failed to trigger CI pipeline!"
+	echo "ERROR"
+fi
+

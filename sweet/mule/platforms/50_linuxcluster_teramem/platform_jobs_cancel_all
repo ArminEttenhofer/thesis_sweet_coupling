@@ -1,0 +1,12 @@
+#! /bin/bash
+
+IDS=$(squeue --cluster=inter --noheader --format="%.18i")
+echo ${IDS}
+
+if [[ -z "$IDS" ]]; then
+	echo "No jobs found on cluster 'inter'"
+else
+	echo "Jobs found on inter... cancelling"
+	scancel --clusters=inter $IDS
+fi
+
