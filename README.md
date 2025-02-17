@@ -6,8 +6,8 @@
 - Install the OpenFOAM adapter in ```/openfoam-adapter/```
 
 ## Running
-- Before running anything go got ```/sweet/``` and execute ```source activate.sh```
-- Got to ```/coupling/```
+- Before running anything go to ```/sweet/``` and execute ```source activate.sh```
+- Go to ```/coupling/```
 
 ### OpenFOAM
 - ```./interfoam_case/BlockMesh``` Creates empty OpenFOAM domain
